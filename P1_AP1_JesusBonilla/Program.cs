@@ -12,8 +12,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        var ConStr = builder.Configuration.GetConnectionString("ConStr");
-        builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConStr));
+        var ConexionString = builder.Configuration.GetConnectionString("ConStr");
+        builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConexionString));
 
         var app = builder.Build();
 
