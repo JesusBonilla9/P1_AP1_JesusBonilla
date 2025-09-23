@@ -1,5 +1,6 @@
 using P1_AP1_JesusBonilla.Components;
-
+using Microsoft.EntityFrameworkCore;
+using P1_AP1_JesusBonilla.DAL;
 namespace P1_AP1_JesusBonilla;
 
 public class Program
@@ -11,6 +12,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+        var ConStr = builder.Configuration.GetConnectionString("ConStr");
+        builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConStr));
 
         var app = builder.Build();
 
