@@ -1,0 +1,99 @@
+﻿@page "/EntradasHuacales/Create"
+
+@inject EntradasHuacalesServices entradasHuacalesService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Crear Entradas Huacales</PageTitle>
+
+<EditForm Model="Entrada" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container mt-4">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Entradas Huacales</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>NombreCliente</strong></label>
+                    <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
+                    <ValidationMessage For="(() => Entrada.NombreCliente)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cantidad</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Entrada.Cantidad" min="0" />
+                    <ValidationMessage For="(() => Entrada.Cantidad)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Precio</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Entrada.Precio" min="0" />
+                    <ValidationMessage For="(() => Entrada.Precio)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                </div>
+
+            @if (!string.IsNullOrEmpty(Mensaje))
+            {
+                <div class="alert @GetAlertClass()">
+                    @Mensaje
+                </div>
+            }
+
+            <div class="card-footer text-center mt-3">
+                <a href="/EntradasHuacales/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                     <button type="submit" class="btn btn-primary bi bi-floppy">Guardar</button>
+                 </div>
+             </div>
+         </div>
+    </div>
+</EditForm>
+
+@code {
+    public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
+    public string Mensaje { get; set; } = string.Empty;
+    public List<EntradasHuacales> ListaEntradasHuacales { get; set; } = new List<EntradasHuacales>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaEntradasHuacales = await entradasHuacalesService.Listar(d => d.EntradaId > 0);
+    }
+
+    public async Task Guardar()
+    {
+        try
+        {
+            var creado = await entradasHuacalesService.Guardar(Entrada);
+
+            if (creado)
+            {
+                Mensaje = "Entrada Huacal Guardada Correctamente";
+                navigationManager.NavigateTo("/EntradasHuacales/Index");
+            }
+            else
+            {
+                Mensaje = "No se pudo guardar correctamente";
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = ex.Message;
+        }
+    }
+
+    private string GetAlertClass()
+    {
+        return string.IsNullOrEmpty(Mensaje) || Mensaje.Contains("No se pudo") ? "alert-danger" : "alert-success";
+    }
+}
+

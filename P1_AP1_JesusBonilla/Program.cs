@@ -1,6 +1,7 @@
 using P1_AP1_JesusBonilla.Components;
 using Microsoft.EntityFrameworkCore;
 using P1_AP1_JesusBonilla.DAL;
+using P1_AP1_JesusBonilla.Services;
 namespace P1_AP1_JesusBonilla;
 
 public class Program
@@ -13,7 +14,9 @@ public class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
         var ConexionString = builder.Configuration.GetConnectionString("ConStr");
-        builder.Services.AddDbContext<Contexto>(options => options.UseSqlite(ConexionString));
+        builder.Services.AddDbContextFactory<Contexto>(options => options.UseSqlite(ConexionString));
+
+        builder.Services.AddScoped<EntradasHuacalesServices>();
 
         var app = builder.Build();
 

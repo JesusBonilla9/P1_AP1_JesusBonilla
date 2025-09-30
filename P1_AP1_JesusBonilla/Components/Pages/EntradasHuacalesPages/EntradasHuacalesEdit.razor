@@ -1,0 +1,161 @@
+﻿@page "/EntradasHuacales/Edit/{EntradaId:int}"
+
+@inject EntradasHuacalesServices entradasHuacalesService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Modificar Entradas Huacales</PageTitle>
+<EditForm Model="Entrada" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+
+    <div class="container mt-4">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Entradas Huacal</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>NombreCliente</strong></label>
+                    <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
+                    <ValidationMessage For="(() => Entrada.NombreCliente)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cantidad</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Entrada.Cantidad" min="0" />
+                    <ValidationMessage For="(() => Entrada.Cantidad)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Precio</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Entrada.Precio" />
+                    <ValidationMessage For="(() => Entrada.Precio)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(Mensaje))
+                {
+                    <div class="alert @GetAlertClass()">
+                        @Mensaje
+                    </div>
+                }
+
+                <div class="card-footer text-center mt-3">
+                    <a href="/EntradasHuacales/Index" class="btn btn-secondary">
+                        <span class="bi bi-arrow-left"></span> Volver
+                    </a>
+                    <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="MostrarModalEliminar"> Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@if (MostrarModal)
+{
+    <div class="modal show" tabindex="-1" style="display: block;" aria-labelledby="confirmDeleteModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminacion</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CerrarModalEliminar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estas seguro de que quieres eliminar al jugador?</p>
+                    <p><strong>EntradaId:</strong> @Entrada.EntradaId</p>
+                    <p><strong>Nombre:</strong> @Entrada.NombreCliente</p>
+                    <p><strong>Cantidad:</strong> @Entrada.Cantidad</p>
+                    <p><strong>Precio:</strong> @Entrada.Precio</p>
+                    <p><strong>Fecha:</strong> @Entrada.Fecha.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalEliminar">Volver</button>
+                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public int EntradaId { get; set; }
+
+    public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
+    public string Mensaje { get; set; } = string.Empty;
+
+    private bool MostrarModal { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Entrada = await entradasHuacalesService.Buscar(EntradaId);
+    }
+
+    public async Task Modificar()
+    {
+        try
+        {
+            var modificado = await entradasHuacalesService.Guardar(Entrada);
+
+            if (modificado)
+            {
+                Mensaje = "Se ha modificado correctamente";
+                navigationManager.NavigateTo("/EntradasHuacales/Index");
+            }
+            else
+            {
+                Mensaje = "No se ha podido modificar correctamente";
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        try
+        {
+            var eliminado = await entradasHuacalesService.Eliminar(Entrada.EntradaId);
+
+            if (eliminado)
+            {
+                Mensaje = "Se ha eliminado correctamente";
+                navigationManager.NavigateTo("/EntradasHuacales/Index");
+            }
+            else
+            {
+                Mensaje = "No se ha podido eliminar correctamente";
+            }
+            CerrarModalEliminar();
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error: {ex.Message}";
+        }
+    }
+
+    private void MostrarModalEliminar()
+    {
+        MostrarModal = true;
+    }
+
+    private void CerrarModalEliminar()
+    {
+        MostrarModal = false;
+    }
+
+    private string GetAlertClass()
+    {
+        return string.IsNullOrEmpty(Mensaje) || Mensaje.Contains("No se pudo") ? "alert-danger" : "alert-success";
+    }
+}
+
+
