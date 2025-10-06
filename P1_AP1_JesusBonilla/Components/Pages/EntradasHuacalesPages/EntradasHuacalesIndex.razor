@@ -1,5 +1,4 @@
-﻿@page "/"
-@page "/EntradasHuacales/Index"
+﻿@page "/EntradasHuacales/Index"
 @inject EntradasHuacalesServices entradasHuacalesServices
 @rendermode InteractiveServer
 @inject NavigationManager navigationManager
@@ -15,6 +14,22 @@
         </div>
 
         <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-3">
+                    <label><strong>Fecha Desde</strong></label>
+                    <InputDate class="form-control" @bind-Value="FechaDesde" />
+                </div>
+                <div class="col-3">
+                    <label><strong>Fecha Hasta</strong></label>
+                    <InputDate class="form-control" @bind-Value="FechaHasta" />
+                </div>
+                <div class="col-3 d-flex align-items-end">
+                    <button class="btn btn-outline-primary w-100" @onclick="FiltrarPorRango">
+                        <i class="bi bi-calendar-range"></i> Filtrar Rango
+                    </button>
+                </div>
+            </div>
+
             <div class="row align-items-end mb-3">
                 <div class="col-3">
                     <label class="form-label"><strong>Filtrar por</strong></label>
@@ -35,6 +50,7 @@
                     </div>
                 </div>
             </div>
+
             <table class="table table-hover">
                 <thead class="table table-striped text-black">
                     <tr>
@@ -42,6 +58,7 @@
                         <th>NombreCliente</th>
                         <th>Cantidad</th>
                         <th>Precio</th>
+                        <th>Importe</th>
                         <th>Fecha</th>
                     </tr>
                 </thead>
@@ -53,6 +70,7 @@
                             <td>@entradaHuacales.NombreCliente</td>
                             <td>@entradaHuacales.Cantidad</td>
                             <td>@entradaHuacales.Precio</td>
+                            <td>@(entradaHuacales.Precio*entradaHuacales.Cantidad)</td>
                             <td>@entradaHuacales.Fecha.ToShortDateString()</td>
 
                             <td class="text-center">
@@ -63,9 +81,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer space-between">
-            <label>Entradas: @ListaEntradasHuacales.Count()</label>
-            <label>Total : @ListaEntradasHuacales.Sum(a => a.Precio)</label>
+        <div class="card-footer space-between text-end">
+            <label>TotalDeCantidades: @ListaEntradasHuacales.Sum(a => a.Cantidad)</label>
+            <label>TotalDeImportes : @ListaEntradasHuacales.Sum(a => a.Precio*a.Cantidad)</label>
         </div>
     </div>
 </div>
@@ -75,6 +93,8 @@
     public List<EntradasHuacales> ListaEntradasHuacales { get; set; } = new List<EntradasHuacales>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+    private DateTime? FechaDesde { get; set; }
+    private DateTime? FechaHasta { get; set; }
     protected override async Task OnInitializedAsync()
     {
         ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.EntradaId > 0);
@@ -84,9 +104,9 @@
     {
         if (!string.IsNullOrWhiteSpace(ValorFiltro))
         {
-            if (Filtro == nameof(EntradasHuacales.EntradaId) && int.TryParse(ValorFiltro, out var animeId))
+            if (Filtro == nameof(EntradasHuacales.EntradaId) && int.TryParse(ValorFiltro, out var entradaId))
             {
-                ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.EntradaId == animeId);
+                ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.EntradaId == entradaId);
             }
             else if (Filtro == nameof(EntradasHuacales.NombreCliente))
             {
@@ -94,14 +114,14 @@
                 j => j.NombreCliente.ToLower().Contains(ValorFiltro.ToLower())
                 );
             }
-            else if (Filtro == nameof(EntradasHuacales.Cantidad) && int.TryParse(ValorFiltro, out var capitulos))
+            else if (Filtro == nameof(EntradasHuacales.Cantidad) && int.TryParse(ValorFiltro, out var Cantidad))
             {
-                ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.Cantidad == capitulos);
+                ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.Cantidad == Cantidad);
             }
-            else if (Filtro == nameof(EntradasHuacales.Fecha) && DateTime.TryParse(ValorFiltro, out var fechaFiltro))
+            else if (Filtro == nameof(EntradasHuacales.Fecha) && DateTime.TryParse(ValorFiltro, out var fecha))
             {
                 ListaEntradasHuacales = await entradasHuacalesServices.Listar(
-                j => j.Fecha.Date == fechaFiltro.Date
+                j => j.Fecha.Date == fecha.Date
                 );
             }
         }
@@ -116,6 +136,13 @@
         ListaEntradasHuacales = await entradasHuacalesServices.Listar(j => j.EntradaId > 0);
         Filtro = string.Empty;
         ValorFiltro = string.Empty;
+    }
+    private async Task FiltrarPorRango()
+    {
+        ListaEntradasHuacales = await entradasHuacalesServices.Listar(e =>
+            (!FechaDesde.HasValue || e.Fecha.Date >= FechaDesde.Value.Date) &&
+            (!FechaHasta.HasValue || e.Fecha.Date <= FechaHasta.Value.Date)
+        );
     }
 }
 
