@@ -18,6 +18,12 @@
             <div class="card-body">
 
                 <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label"><strong>NombreCliente</strong></label>
                     <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
                     <ValidationMessage For="(() => Entrada.NombreCliente)" />
@@ -25,36 +31,35 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Cantidad</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Cantidad" min="0" />
+                    <InputNumber class="form-control" @bind-Value="Entrada.Cantidad"/>
                     <ValidationMessage For="(() => Entrada.Cantidad)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Precio</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Precio" min="0" />
+                    <InputNumber class="form-control" @bind-Value="Entrada.Precio"/>
                     <ValidationMessage For="(() => Entrada.Precio)" />
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label"><strong>Fecha</strong></label>
-                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
-                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                    <label class="form-label"><strong>Importe</strong></label>
+                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Precio)" readonly />
                 </div>
 
-            @if (!string.IsNullOrEmpty(Mensaje))
-            {
+                @if (!string.IsNullOrEmpty(Mensaje))
+                {
                 <div class="alert @GetAlertClass()">
                     @Mensaje
                 </div>
-            }
+                }
 
+           
+             </div>
             <div class="card-footer text-center mt-3">
                 <a href="/EntradasHuacales/Index" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver
                 </a>
-                     <button type="submit" class="btn btn-primary bi bi-floppy">Guardar</button>
-                 </div>
-             </div>
+                <button type="submit" class="btn btn-primary bi bi-floppy">Guardar</button>
+            </div>
          </div>
     </div>
 </EditForm>
@@ -62,11 +67,10 @@
 @code {
     public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
     public string Mensaje { get; set; } = string.Empty;
-    public List<EntradasHuacales> ListaEntradasHuacales { get; set; } = new List<EntradasHuacales>();
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEntradasHuacales = await entradasHuacalesService.Listar(d => d.EntradaId > 0);
+        Entrada.Fecha = DateTime.Now;
     }
 
     public async Task Guardar()

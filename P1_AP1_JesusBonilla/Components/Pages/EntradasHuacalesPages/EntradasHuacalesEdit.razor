@@ -15,6 +15,13 @@
             </div>
 
             <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label"><strong>NombreCliente</strong></label>
                     <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
@@ -32,11 +39,9 @@
                     <InputNumber class="form-control" @bind-Value="Entrada.Precio" />
                     <ValidationMessage For="(() => Entrada.Precio)" />
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label"><strong>Fecha</strong></label>
-                    <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
-                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                    <label class="form-label"><strong>Importe</strong></label>
+                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Precio)" readonly />
                 </div>
 
                 @if (!string.IsNullOrEmpty(Mensaje))
@@ -68,7 +73,7 @@
                     <button type="button" class="btn-close" aria-label="Close" @onclick="CerrarModalEliminar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>¿Estas seguro de que quieres eliminar al jugador?</p>
+                    <p>¿Estas seguro de que quieres eliminar la entrada huacal?</p>
                     <p><strong>EntradaId:</strong> @Entrada.EntradaId</p>
                     <p><strong>Nombre:</strong> @Entrada.NombreCliente</p>
                     <p><strong>Cantidad:</strong> @Entrada.Cantidad</p>
