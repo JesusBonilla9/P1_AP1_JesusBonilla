@@ -1,0 +1,12 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace P1_AP1_JesusBonilla.Models
+{
+    public class TiposHuacales
+    {
+        [Key]
+        public int TipoId { get; set; }
+        public string Descripcion {  get; set; }
+        public int Existencias { get; set; }
+    }
+}

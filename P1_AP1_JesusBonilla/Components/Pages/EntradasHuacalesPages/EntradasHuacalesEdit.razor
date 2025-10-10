@@ -2,61 +2,126 @@
 
 @inject EntradasHuacalesServices entradasHuacalesService
 @inject NavigationManager navigationManager
+@inject ToastService toastService
 @rendermode InteractiveServer
 
 <PageTitle>Modificar Entradas Huacales</PageTitle>
+
+<Toasts class="p-3" AutoHide="true" Delay="5000" Placement="ToastsPlacement.TopRight" />
+
 <EditForm Model="Entrada" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
 
     <div class="container mt-4">
         <div class="card shadow-lg">
+
+            @* ENCABEZADO *@
             <div class="card-header text-center">
-                <h5 class="card-title">Crear Entradas Huacal</h5>
+                <h5 class="card-title mb-0">Modificar Entrada</h5>
             </div>
 
+            @* CUERPO *@
             <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>EntradaId</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
+                </div>
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Fecha</strong></label>
                     <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
-                    <ValidationMessage For="(() => Entrada.Fecha)" />
+                    <ValidationMessage For="@(() => Entrada.Fecha)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>NombreCliente</strong></label>
+                    <label class="form-label"><strong>Nombre del Cliente</strong></label>
                     <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
-                    <ValidationMessage For="(() => Entrada.NombreCliente)" />
+                    <ValidationMessage For="@(() => Entrada.NombreCliente)" />
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label"><strong>Cantidad</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Cantidad" min="0" />
-                    <ValidationMessage For="(() => Entrada.Cantidad)" />
-                </div>
+                <div class="border border-success p-3 mt-3 rounded">
+                    <h5 class="text-center mb-3">Detalles de la Entrada</h5>
 
-                <div class="mb-3">
-                    <label class="form-label"><strong>Precio</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Precio" />
-                    <ValidationMessage For="(() => Entrada.Precio)" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label"><strong>Importe</strong></label>
-                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Precio)" readonly />
-                </div>
+                    <div class="col-auto input-group align-items-center">
+                        <label class="col-form-label input-group-text">Tipo:</label>
+                        <InputSelect class="form-select" @bind-Value="Detalle.TipoId">
+                            <option disabled value="0">Seleccione un tipo de huacal</option>
+                            @foreach (var tipo in ListaTipos)
+                            {
+                                <option value="@tipo.TipoId">@tipo.Descripcion - (@tipo.Existencias disponibles)</option>
+                            }
+                        </InputSelect>
 
-                @if (!string.IsNullOrEmpty(Mensaje))
-                {
-                    <div class="alert @GetAlertClass()">
-                        @Mensaje
+                        <label class="col-form-label input-group-text">Cantidad:</label>
+                        <InputNumber class="form-control" @bind-Value="Detalle.Cantidad" />
+
+                        <label class="col-form-label input-group-text">Precio:</label>
+                        <InputNumber class="form-control" @bind-Value="Detalle.Precio" />
+
+                        <button type="button" class="btn btn-outline-success" @onclick="AgregarDetalle">
+                            <span class="bi bi-plus"></span> Agregar
+                        </button>
                     </div>
-                }
 
-                <div class="card-footer text-center mt-3">
-                    <a href="/EntradasHuacales/Index" class="btn btn-secondary">
-                        <span class="bi bi-arrow-left"></span> Volver
+                    <table class="table table-striped table-bordered mt-3">
+                        <thead class="table-success text-center">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Importe</th>
+                                <th>Remover</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in Entrada.EntradasHuacalesDetalles)
+                            {
+                                <tr class="text-center">
+                                    <td>@ListaTipos.FirstOrDefault(t => t.TipoId == detalle.TipoId)?.Descripcion</td>
+                                    <td>@detalle.Cantidad</td>
+                                    <td>RD$@Math.Round(detalle.Precio, 2)</td>
+                                    <td>RD$@Math.Round(detalle.Cantidad * detalle.Precio, 2)</td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger" @onclick="() => RemoverDetalle(detalle)">
+                                            <span class="bi bi-trash"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-6 text-end">
+                        <label class="form-label"><strong>Total Cantidad:</strong></label>
+                        <div class="form-control text-end"><strong>@Entrada.Cantidad</strong></div>
+                    </div>
+                    <div class="col-6 text-end">
+                        <label class="form-label"><strong>Total Importe:</strong></label>
+                        <div class="form-control text-end"><strong>RD$@Math.Round(Entrada.Importe, 2)</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            @* PIE *@
+            <div class="card-footer text-center">
+                <div class="btn-group">
+                    <a href="/EntradasHuacales/Index" class="btn btn-outline-secondary">
+                        <span class="bi bi-arrow-bar-left"></span> Volver
                     </a>
-                    <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
-                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="MostrarModalEliminar"> Eliminar</button>
+
+                    @if (!modificado)
+                    {
+                        <button type="submit" class="btn btn-outline-success">
+                            <span class="bi bi-check-circle"></span> Guardar
+                        </button>
+
+                        <button type="button" class="btn btn-outline-danger" @onclick="MostrarModalEliminar">
+                            <span class="bi bi-trash-fill"></span> Eliminar
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -65,86 +130,117 @@
 
 @if (MostrarModal)
 {
-    <div class="modal show" tabindex="-1" style="display: block;" aria-labelledby="confirmDeleteModalLabel" aria-hidden="false">
+    <div class="modal show fade" style="display:block;" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminacion</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @onclick="CerrarModalEliminar"></button>
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalEliminar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>¿Estas seguro de que quieres eliminar la entrada huacal?</p>
-                    <p><strong>EntradaId:</strong> @Entrada.EntradaId</p>
-                    <p><strong>Nombre:</strong> @Entrada.NombreCliente</p>
+                    <p>¿Seguro que deseas eliminar esta entrada?</p>
+                    <p><strong>ID:</strong> @Entrada.EntradaId</p>
+                    <p><strong>Cliente:</strong> @Entrada.NombreCliente</p>
                     <p><strong>Cantidad:</strong> @Entrada.Cantidad</p>
-                    <p><strong>Precio:</strong> @Entrada.Precio</p>
+                    <p><strong>Importe:</strong> RD$@Math.Round(Entrada.Importe, 2)</p>
                     <p><strong>Fecha:</strong> @Entrada.Fecha.ToString("dd/MM/yyyy")</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CerrarModalEliminar">Volver</button>
-                    <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+                    <button class="btn btn-outline-secondary" @onclick="CerrarModalEliminar">
+                        <span class="bi bi-arrow-bar-left"></span> Cancelar
+                    </button>
+                    <button class="btn btn-outline-danger" @onclick="Eliminar">
+                        <span class="bi bi-trash-fill"></span> Eliminar
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 }
+
 @code {
-    [Parameter]
-    public int EntradaId { get; set; }
+    [Parameter] public int EntradaId { get; set; }
 
-    public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
-    public string Mensaje { get; set; } = string.Empty;
-
-    private bool MostrarModal { get; set; } = false;
+    public EntradasHuacales Entrada { get; set; } = new();
+    public EntradasHuacalesDetalles Detalle { get; set; } = new();
+    public List<TiposHuacales> ListaTipos { get; set; } = [];
+    public bool MostrarModal { get; set; } = false;
+    public bool modificado { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         Entrada = await entradasHuacalesService.Buscar(EntradaId);
+        ListaTipos = await entradasHuacalesService.ListarTipos();
     }
 
-    public async Task Modificar()
+    private void AgregarDetalle()
     {
-        try
+        if (Detalle.TipoId < 1)
         {
-            var modificado = await entradasHuacalesService.Guardar(Entrada);
-
-            if (modificado)
-            {
-                Mensaje = "Se ha modificado correctamente";
-                navigationManager.NavigateTo("/EntradasHuacales/Index");
-            }
-            else
-            {
-                Mensaje = "No se ha podido modificar correctamente";
-            }
+            toastService.ShowWarning("Debe seleccionar un tipo de huacal");
+            return;
         }
-        catch (Exception ex)
+
+        if (Detalle.Cantidad < 1)
         {
-            Mensaje = $"Error: {ex.Message}";
+            toastService.ShowWarning("La cantidad debe ser mayor que cero");
+            return;
+        }
+
+        if (Detalle.Precio < 0.01)
+        {
+            toastService.ShowWarning("El precio debe ser mayor que cero");
+            return;
+        }
+
+        Entrada.EntradasHuacalesDetalles.Add(Detalle);
+        CalcularTotales();
+        Detalle = new EntradasHuacalesDetalles();
+    }
+
+    private void RemoverDetalle(EntradasHuacalesDetalles detalle)
+    {
+        Entrada.EntradasHuacalesDetalles.Remove(detalle);
+        CalcularTotales();
+        Detalle = detalle;
+    }
+
+    private void CalcularTotales()
+    {
+        Entrada.Cantidad = Entrada.EntradasHuacalesDetalles.Sum(d => d.Cantidad);
+        Entrada.Importe = Entrada.EntradasHuacalesDetalles.Sum(d => d.Cantidad * d.Precio);
+    }
+
+    private async Task Modificar()
+    {
+        modificado = await entradasHuacalesService.Guardar(Entrada);
+        if (modificado)
+        {
+            toastService.ShowSuccess("Entrada modificada correctamente");
+            await Task.Delay(2000);
+            navigationManager.NavigateTo("/EntradasHuacales/Index");
+        }
+        else
+        {
+            toastService.ShowError("Error al modificar la entrada");
         }
     }
 
     private async Task Eliminar()
     {
-        try
+        modificado = await entradasHuacalesService.Eliminar(EntradaId);
+        if (modificado)
         {
-            var eliminado = await entradasHuacalesService.Eliminar(Entrada.EntradaId);
+            toastService.ShowSuccess("Entrada eliminada correctamente");
+            await Task.Delay(2000);
+            navigationManager.NavigateTo("/EntradasHuacales/Index");
+        }
+        else
+        {
+            toastService.ShowError("Error al eliminar la entrada");
+        }
 
-            if (eliminado)
-            {
-                Mensaje = "Se ha eliminado correctamente";
-                navigationManager.NavigateTo("/EntradasHuacales/Index");
-            }
-            else
-            {
-                Mensaje = "No se ha podido eliminar correctamente";
-            }
-            CerrarModalEliminar();
-        }
-        catch (Exception ex)
-        {
-            Mensaje = $"Error: {ex.Message}";
-        }
+        CerrarModalEliminar();
     }
 
     private void MostrarModalEliminar()
@@ -156,11 +252,7 @@
     {
         MostrarModal = false;
     }
-
-    private string GetAlertClass()
-    {
-        return string.IsNullOrEmpty(Mensaje) || Mensaje.Contains("No se pudo") ? "alert-danger" : "alert-success";
-    }
 }
+
 
 
