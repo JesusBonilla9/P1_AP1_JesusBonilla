@@ -59,9 +59,9 @@
                             <th>EntradaId</th>
                             <th>NombreCliente</th>
                             <th>Cantidad</th>
-                            <th>Precio</th>
                             <th>Importe</th>
                             <th>Fecha</th>
+                            <th>Opciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,8 +71,7 @@
                                 <td>@entradaHuacales.EntradaId</td>
                                 <td>@entradaHuacales.NombreCliente</td>
                                 <td>@entradaHuacales.Cantidad</td>
-                                <td>@entradaHuacales.Importe</td>
-                                <td>@(entradaHuacales.Importe*entradaHuacales.Cantidad)</td>
+                                <td>RD$@Math.Round(@entradaHuacales.Importe, 2)</td>
                                 <td>@entradaHuacales.Fecha.ToShortDateString()</td>
 
                                 <td class="text-center">
@@ -85,8 +84,8 @@
             </div>
         </div>
         <div class="card-footer space-between text-end">
-            <label>TotalDeCantidades: @ListaEntradasHuacales.Sum(a => a.Cantidad)</label>
-            <label>TotalDeImportes : @ListaEntradasHuacales.Sum(a => a.Importe*a.Cantidad)</label>
+            <label class=" px-2"><strong>TotalDeCantidades: </strong> @ListaEntradasHuacales.Sum(a => a.Cantidad)</label>
+            <label><strong>TotalDeImportes : </strong>RD$@Math.Round( @ListaEntradasHuacales.Sum(a => a.Importe), 2)</label>
         </div>
     </div>
 </div>
