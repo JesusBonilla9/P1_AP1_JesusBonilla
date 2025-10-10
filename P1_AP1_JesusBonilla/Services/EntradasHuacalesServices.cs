@@ -27,7 +27,7 @@ public class EntradasHuacalesServices(IDbContextFactory <Contexto> DbFactory)
     {
         await using var contexto = await DbFactory.CreateDbContextAsync();
         contexto.EntradasHuacales.Add(Entrada);
-        await AfectarHuacales(Entrada.EntradasHuacalesDetalles.ToArray(), TipoOperacion.Resta);
+        await AfectarHuacales(Entrada.EntradasHuacalesDetalles.ToArray(), TipoOperacion.Suma);
         return await contexto.SaveChangesAsync() > 0;
     }
     private async Task AfectarHuacales(EntradasHuacalesDetalles[] detalle, TipoOperacion operacion)
