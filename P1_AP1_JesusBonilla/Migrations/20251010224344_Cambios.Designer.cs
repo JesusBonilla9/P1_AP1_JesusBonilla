@@ -11,7 +11,7 @@ using P1_AP1_JesusBonilla.DAL;
 namespace P1_AP1_JesusBonilla.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20251010192455_Cambios")]
+    [Migration("20251010224344_Cambios")]
     partial class Cambios
     {
         /// <inheritdoc />

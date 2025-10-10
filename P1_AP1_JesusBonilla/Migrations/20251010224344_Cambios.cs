@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,11 +8,27 @@
 namespace P1_AP1_JesusBonilla.Migrations
 {
     /// <inheritdoc />
-    public partial class CambiosEnLosModelos : Migration
+    public partial class Cambios : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "EntradasHuacales",
+                columns: table => new
+                {
+                    EntradaId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    NombreCliente = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Cantidad = table.Column<int>(type: "INTEGER", nullable: false),
+                    Importe = table.Column<double>(type: "REAL", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EntradasHuacales", x => x.EntradaId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "TiposHuacales",
                 columns: table => new
@@ -46,12 +63,6 @@ namespace P1_AP1_JesusBonilla.Migrations
                         principalTable: "EntradasHuacales",
                         principalColumn: "EntradaId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_EntradasHuacalesDetalles_TiposHuacales_TipoId",
-                        column: x => x.TipoId,
-                        principalTable: "TiposHuacales",
-                        principalColumn: "TipoId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -71,11 +82,6 @@ namespace P1_AP1_JesusBonilla.Migrations
                 name: "IX_EntradasHuacalesDetalles_EntradaId",
                 table: "EntradasHuacalesDetalles",
                 column: "EntradaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EntradasHuacalesDetalles_TipoId",
-                table: "EntradasHuacalesDetalles",
-                column: "TipoId");
         }
 
         /// <inheritdoc />
@@ -86,6 +92,9 @@ namespace P1_AP1_JesusBonilla.Migrations
 
             migrationBuilder.DropTable(
                 name: "TiposHuacales");
+
+            migrationBuilder.DropTable(
+                name: "EntradasHuacales");
         }
     }
 }
