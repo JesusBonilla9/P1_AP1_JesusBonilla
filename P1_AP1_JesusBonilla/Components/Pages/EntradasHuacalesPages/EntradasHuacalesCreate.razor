@@ -2,9 +2,12 @@
 
 @inject EntradasHuacalesServices entradasHuacalesService
 @inject NavigationManager navigationManager
+@inject ToastService toastService
 @rendermode InteractiveServer
 
 <PageTitle>Crear Entradas Huacales</PageTitle>
+
+<Toasts class="p-3" AutoHide="true" Delay="5000" Placement="ToastsPlacement.TopRight" />
 
 <EditForm Model="Entrada" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
@@ -37,22 +40,14 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Precio</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Precio"/>
-                    <ValidationMessage For="(() => Entrada.Precio)" />
+                    <InputNumber class="form-control" @bind-Value="Entrada.Importe"/>
+                    <ValidationMessage For="(() => Entrada.Importe)" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label"><strong>Importe</strong></label>
-                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Precio)" readonly />
+                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Importe)" readonly />
                 </div>
 
-                @if (!string.IsNullOrEmpty(Mensaje))
-                {
-                <div class="alert @GetAlertClass()">
-                    @Mensaje
-                </div>
-                }
-
-           
              </div>
             <div class="card-footer text-center mt-3">
                 <a href="/EntradasHuacales/Index" class="btn btn-secondary">
@@ -66,7 +61,6 @@
 
 @code {
     public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
-    public string Mensaje { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,23 +75,19 @@
 
             if (creado)
             {
-                Mensaje = "Entrada Huacal Guardada Correctamente";
+                toastService.ShowSuccess("Entrada Huacal guardada correctamente");
+                await Task.Delay(1500);
                 navigationManager.NavigateTo("/EntradasHuacales/Index");
             }
             else
             {
-                Mensaje = "No se pudo guardar correctamente";
+                toastService.ShowError("No se pudo guardar correctamente");
             }
         }
         catch (Exception ex)
         {
-            Mensaje = ex.Message;
+            toastService.ShowError($"Error: {ex.Message}");
         }
-    }
-
-    private string GetAlertClass()
-    {
-        return string.IsNullOrEmpty(Mensaje) || Mensaje.Contains("No se pudo") ? "alert-danger" : "alert-success";
     }
 }
 

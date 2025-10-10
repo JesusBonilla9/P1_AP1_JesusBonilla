@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace P1_AP1_JesusBonilla.Models;
 
@@ -14,7 +15,10 @@ public class EntradasHuacales
     public int Cantidad { get; set; }
     [Required(ErrorMessage = "El campo Precio es obligatorio")]
     [Range(1, int.MaxValue, ErrorMessage = "El precio debe ser mayor a 0")]
-    public double Precio { get; set; }
+    public double Importe { get; set; }
     [Required(ErrorMessage = "La fecha es obligatoria")]
     public DateTime Fecha { get; set; }
+
+    [ForeignKey(nameof(EntradaId))]
+    public virtual ICollection<EntradasHuacalesDetalles> EntradasHuacalesDetalles { get; set; } = new List<EntradasHuacalesDetalles>();
 }

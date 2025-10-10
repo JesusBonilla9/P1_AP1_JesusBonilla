@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P1_AP1_JesusBonilla.DAL;
 
@@ -10,9 +11,11 @@ using P1_AP1_JesusBonilla.DAL;
 namespace P1_AP1_JesusBonilla.Migrations
 {
     [DbContext(typeof(Contexto))]
-    partial class ContextoModelSnapshot : ModelSnapshot
+    [Migration("20251009123514_CambiosEnLosModelos")]
+    partial class CambiosEnLosModelos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -29,13 +32,13 @@ namespace P1_AP1_JesusBonilla.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("Importe")
-                        .HasColumnType("REAL");
-
                     b.Property<string>("NombreCliente")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
+
+                    b.Property<double>("Precio")
+                        .HasColumnType("REAL");
 
                     b.HasKey("EntradaId");
 
@@ -63,6 +66,8 @@ namespace P1_AP1_JesusBonilla.Migrations
                     b.HasKey("DetalleId");
 
                     b.HasIndex("EntradaId");
+
+                    b.HasIndex("TipoId");
 
                     b.ToTable("EntradasHuacalesDetalles");
                 });
@@ -125,11 +130,21 @@ namespace P1_AP1_JesusBonilla.Migrations
 
             modelBuilder.Entity("P1_AP1_JesusBonilla.Models.EntradasHuacalesDetalles", b =>
                 {
-                    b.HasOne("P1_AP1_JesusBonilla.Models.EntradasHuacales", null)
+                    b.HasOne("P1_AP1_JesusBonilla.Models.EntradasHuacales", "entradaHuacal")
                         .WithMany("EntradasHuacalesDetalles")
                         .HasForeignKey("EntradaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("P1_AP1_JesusBonilla.Models.TiposHuacales", "TipoHuacal")
+                        .WithMany()
+                        .HasForeignKey("TipoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TipoHuacal");
+
+                    b.Navigation("entradaHuacal");
                 });
 
             modelBuilder.Entity("P1_AP1_JesusBonilla.Models.EntradasHuacales", b =>

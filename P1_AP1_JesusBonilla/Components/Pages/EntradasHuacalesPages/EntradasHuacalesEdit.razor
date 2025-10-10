@@ -2,16 +2,18 @@
 
 @inject EntradasHuacalesServices entradasHuacalesService
 @inject NavigationManager navigationManager
+@inject ToastService toastService
 @rendermode InteractiveServer
 
 <PageTitle>Modificar Entradas Huacales</PageTitle>
+<Toasts class="p-3" AutoHide="true" Delay="5000" Placement="ToastsPlacement.TopRight" />
 <EditForm Model="Entrada" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
 
     <div class="container mt-4">
         <div class="card shadow-lg">
             <div class="card-header text-center">
-                <h5 class="card-title">Crear Entradas Huacal</h5>
+                <h5 class="card-title">Modificar Entrada Huacal</h5>
             </div>
 
             <div class="card-body">
@@ -23,7 +25,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>NombreCliente</strong></label>
+                    <label class="form-label"><strong>Nombre Cliente</strong></label>
                     <InputText class="form-control" @bind-Value="Entrada.NombreCliente" />
                     <ValidationMessage For="(() => Entrada.NombreCliente)" />
                 </div>
@@ -36,20 +38,14 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Precio</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Entrada.Precio" />
-                    <ValidationMessage For="(() => Entrada.Precio)" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label"><strong>Importe</strong></label>
-                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Precio)" readonly />
+                    <InputNumber class="form-control" @bind-Value="Entrada.Importe" />
+                    <ValidationMessage For="(() => Entrada.Importe)" />
                 </div>
 
-                @if (!string.IsNullOrEmpty(Mensaje))
-                {
-                    <div class="alert @GetAlertClass()">
-                        @Mensaje
-                    </div>
-                }
+                <div class="mb-3">
+                    <label class="form-label"><strong>Importe</strong></label>
+                    <input class="form-control" value="@(Entrada.Cantidad* Entrada.Importe)" readonly />
+                </div>
 
                 <div class="card-footer text-center mt-3">
                     <a href="/EntradasHuacales/Index" class="btn btn-secondary">
@@ -69,15 +65,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminacion</h5>
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
                     <button type="button" class="btn-close" aria-label="Close" @onclick="CerrarModalEliminar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>¿Estas seguro de que quieres eliminar la entrada huacal?</p>
+                    <p>¿Estás seguro de que quieres eliminar la entrada huacal?</p>
                     <p><strong>EntradaId:</strong> @Entrada.EntradaId</p>
                     <p><strong>Nombre:</strong> @Entrada.NombreCliente</p>
                     <p><strong>Cantidad:</strong> @Entrada.Cantidad</p>
-                    <p><strong>Precio:</strong> @Entrada.Precio</p>
+                    <p><strong>Precio:</strong> @Entrada.Importe</p>
                     <p><strong>Fecha:</strong> @Entrada.Fecha.ToString("dd/MM/yyyy")</p>
                 </div>
                 <div class="modal-footer">
@@ -88,12 +84,12 @@
         </div>
     </div>
 }
+
 @code {
     [Parameter]
     public int EntradaId { get; set; }
 
     public EntradasHuacales Entrada { get; set; } = new EntradasHuacales();
-    public string Mensaje { get; set; } = string.Empty;
 
     private bool MostrarModal { get; set; } = false;
 
@@ -110,17 +106,18 @@
 
             if (modificado)
             {
-                Mensaje = "Se ha modificado correctamente";
+                toastService.ShowSuccess("La entrada ha sido modificada correctamente.", "Éxito");
+                await Task.Delay(1500);
                 navigationManager.NavigateTo("/EntradasHuacales/Index");
             }
             else
             {
-                Mensaje = "No se ha podido modificar correctamente";
+                toastService.ShowWarning("No se pudo modificar la entrada.", "Advertencia");
             }
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error: {ex.Message}";
+            toastService.ShowError($"Error al modificar: {ex.Message}", "Error");
         }
     }
 
@@ -132,18 +129,20 @@
 
             if (eliminado)
             {
-                Mensaje = "Se ha eliminado correctamente";
+                toastService.ShowSuccess("La entrada ha sido eliminada correctamente.");
+                await Task.Delay(1500);
                 navigationManager.NavigateTo("/EntradasHuacales/Index");
             }
             else
             {
-                Mensaje = "No se ha podido eliminar correctamente";
+                toastService.ShowError("No se pudo eliminar correctamente");
             }
+
             CerrarModalEliminar();
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error: {ex.Message}";
+            toastService.ShowError($"Error al eliminar: {ex.Message}", "Error");
         }
     }
 
@@ -155,11 +154,6 @@
     private void CerrarModalEliminar()
     {
         MostrarModal = false;
-    }
-
-    private string GetAlertClass()
-    {
-        return string.IsNullOrEmpty(Mensaje) || Mensaje.Contains("No se pudo") ? "alert-danger" : "alert-success";
     }
 }
 

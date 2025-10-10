@@ -15,8 +15,8 @@ public class Program
             .AddInteractiveServerComponents();
         var ConexionString = builder.Configuration.GetConnectionString("ConStr");
         builder.Services.AddDbContextFactory<Contexto>(options => options.UseSqlite(ConexionString));
-
         builder.Services.AddScoped<EntradasHuacalesServices>();
+        builder.Services.AddBlazorBootstrap();
 
         var app = builder.Build();
 
